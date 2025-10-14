@@ -1,5 +1,5 @@
 {
-  "name": "MindDraw",
+  "name": "minddraw",
   "private": true,
   "scripts": {
     "build": "turbo run build",
