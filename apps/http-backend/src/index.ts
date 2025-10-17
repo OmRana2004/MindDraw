@@ -1,4 +1,5 @@
 import express from 'express';
+import bcrypt from "bcrypt"
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '@repo/backend-common/config';
 import { middleware } from './middleware';
@@ -18,10 +19,12 @@ app.post("/signup", async (req, res) => {
         return;
     }
    try {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(parsedData.data.password, saltRounds)
      const user = await prismaClient.user.create({
         data: {
             email: parsedData.data?.username,
-            password: parsedData.data.password,
+            password: hashedPassword,
             name: parsedData.data.name,
             photo: ""
         }
@@ -45,11 +48,9 @@ app.post("/signin",async (req, res) => {
         return;
     }
 
-    // compare the hashed password here
     const user = await prismaClient.user.findFirst({
         where: {
-            email: parsedData.data.username,
-            password: parsedData.data.password
+            email: parsedData.data.username          
         }
     })
 
@@ -59,6 +60,15 @@ app.post("/signin",async (req, res) => {
         })
         return;
     }
+    // Compare hashed password
+  const isPasswordValid = await bcrypt.compare(parsedData.data.password, user.password);
+
+  if (!isPasswordValid) {
+    res.status(403).json({
+      message: "Not authorized"
+    });
+    return;
+  }
 
     const token =jwt.sign({
         userId: user?.id
@@ -69,15 +79,28 @@ app.post("/signin",async (req, res) => {
     });
 })
 
-app.post("/room", middleware, (req, res) =>{
-    const data = CreateRoomSchema.safeParse(req.body);
-    if (!data.success) {
+app.post("/room", middleware, async (req, res) =>{
+    const parsedData = CreateRoomSchema.safeParse(req.body);
+    if (!parsedData.success) {
          res.json({
             message: "Incorrect inputs"
         })
         return;
     }
-     // db call
+    const userId = req.userId;
+    if (!userId) {
+        res.status(403).json({
+            message: "User not authenticated"
+        });
+        return;
+    }
+
+    await prismaClient.room.create({
+        data: {
+            slug: parsedData.data.name,
+            adminId: userId
+        }
+    })
 
      res.json({
         roomId: 123
