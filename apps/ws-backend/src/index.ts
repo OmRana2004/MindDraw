@@ -10,23 +10,16 @@ interface User {
   rooms: string[],
   userId: string
 }
+
 const users: User[] = [];
 
 function checkUser(token: string): string | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-
-    if (typeof decoded == "string") {
-      return null;
-    }
-
-    if (!decoded || !decoded.userId) {
-      return null;
-    }
-
-    return decoded.userId as string; 
+    if (typeof decoded === "string" || !decoded || !decoded.userId) return null;
+    return decoded.userId as string;
   } catch {
-    return null; 
+    return null;
   }
 }
 
@@ -47,11 +40,7 @@ wss.on('connection', function connection(ws, request) {
       return;
     }
 
-    users.push({
-      userId,
-      rooms: [],
-      ws
-    });
+    users.push({ userId, rooms: [], ws });
 
     ws.on('message', async function message(data) {
       try {
@@ -65,22 +54,27 @@ wss.on('connection', function connection(ws, request) {
         if (parsedData.type === "leave_room") {
           const user = users.find(x => x.ws === ws);
           if (!user) return;
-          user.rooms = user.rooms.filter(x => x !== parsedData.room);
+          user.rooms = user.rooms.filter(x => x !== parsedData.roomId);
         }
 
         if (parsedData.type === "chat") {
-          const roomId = parsedData.roomId;
+          const roomId = parseInt(parsedData.roomId); // ✅ ensure integer
           const message = parsedData.message;
 
-          await prismaClient.chat.create({
-            data: {
-              roomId,
-              message,
-              userId
-            }
-          });
+          try {
+            await prismaClient.chat.create({
+              data: {
+                roomId,
+                message,
+                userId
+              }
+            });
+          } catch (dbErr) {
+            console.error("Database save error:", dbErr);
+          }
+
           users.forEach(user => {
-            if (user.rooms.includes(roomId)) {
+            if (user.rooms.includes(parsedData.roomId)) {
               user.ws.send(JSON.stringify({
                 type: "chat",
                 message,
@@ -93,7 +87,6 @@ wss.on('connection', function connection(ws, request) {
         console.error("Message handling error:", err);
       }
     });
-
   } catch (err) {
     console.error("Connection error:", err);
     ws.close();
