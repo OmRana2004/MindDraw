@@ -58,7 +58,7 @@ wss.on('connection', function connection(ws, request) {
         }
 
         if (parsedData.type === "chat") {
-          const roomId = parseInt(parsedData.roomId); // ✅ ensure integer
+          const roomId = parseInt(parsedData.roomId); 
           const message = parsedData.message;
 
           try {

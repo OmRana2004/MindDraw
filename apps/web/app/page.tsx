@@ -1,8 +1,32 @@
-export default function Page() {
-  return <div className="flex gap-4 p-4 justify-center align-middle h-screen items-center">
+"use client"
 
-    om
-    <button>Signup</button>
-    <button>Signin</button>
-    </div>;
-}
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+
+export default function Home() {
+  const [roomId, setRoomId] = useState("")
+  const router = useRouter();
+
+  return (
+  <div style={{
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  height: "100vh",
+  width: "100vw"
+}}>
+<div>
+  <input style={{
+    padding: 10
+  }} value ={roomId} onChange={(e) => {
+    setRoomId(e.target.value);
+  }} type="text" placeholder="Room Id"></input>
+
+  <button style={{padding: 10}} onClick={() => {
+    router.push(`/room/${roomId}`);
+  }}>Join Room</button>
+</div>
+    </div>
+    )
+}    
