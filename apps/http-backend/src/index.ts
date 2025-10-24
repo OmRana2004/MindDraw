@@ -23,7 +23,7 @@ app.post("/signup", async (req, res) => {
     const hashedPassword = await bcrypt.hash(parsedData.data.password, saltRounds)
      const user = await prismaClient.user.create({
         data: {
-            email: parsedData.data?.username,
+            email: parsedData.data?.email,
             password: hashedPassword,
             name: parsedData.data.name,
             photo: ""
@@ -50,7 +50,7 @@ app.post("/signin",async (req, res) => {
 
     const user = await prismaClient.user.findFirst({
         where: {
-            email: parsedData.data.username          
+            email: parsedData.data.email          
         }
     })
 
