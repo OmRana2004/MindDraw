@@ -1,28 +1,32 @@
 "use client"
 
-import { Grid, ArrowRight, Circle, Square, Triangle, Moon, Sun } from 'lucide-react';
+import { Grid, ArrowRight, Circle, Square, Triangle, Moon, Sun, Link as LinkIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'dark') {
-      setIsDark(true);
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') setIsDark(true);
     }
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+    setIsDark(prev => {
+      const newTheme = !prev;
+      localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+      return newTheme;
+    });
   };
 
   return (
     <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${
       isDark ? 'bg-gray-900' : 'bg-white'
     }`}>
+      {/* Background Shapes */}
       <div className="absolute inset-0 pointer-events-none">
         <Circle className={`absolute top-20 left-10 w-16 h-16 opacity-60 animate-pulse ${
           isDark ? 'text-blue-500' : 'text-blue-200'
@@ -50,6 +54,7 @@ export default function Home() {
         }`} />
       </div>
 
+      {/* Navbar */}
       <nav className={`border-b relative z-10 backdrop-blur-sm transition-colors duration-300 ${
         isDark ? 'border-gray-800 bg-gray-900/80' : 'border-gray-200 bg-white/80'
       }`}>
@@ -57,10 +62,12 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <Grid className={`w-6 h-6 ${isDark ? 'text-white' : 'text-gray-900'}`} />
             <span className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              ExcelDraw
+              MindDraw
             </span>
           </div>
+
           <div className="flex items-center gap-4">
+            {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
               className={`p-2 rounded-lg transition-colors ${
@@ -68,21 +75,26 @@ export default function Home() {
               }`}
               aria-label="Toggle theme"
             >
-              {isDark ? (
-                <Sun className="w-5 h-5 text-yellow-400" />
-              ) : (
-                <Moon className="w-5 h-5 text-gray-600" />
-              )}
+              {isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-600" />}
             </button>
-            <button className={`text-sm transition-colors ${
+
+            {/* Navigation Links */}
+            <Link href="/" className={`text-sm transition-colors ${
               isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
             }`}>
-              Sign In
-            </button>
+              Guest
+            </Link>
+
+            <Link href="/signup" className={`text-sm transition-colors ${
+              isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+            }`}>
+              Sign Up
+            </Link>
           </div>
         </div>
       </nav>
 
+      {/* Hero Section */}
       <main className="max-w-4xl mx-auto px-6 py-32 text-center relative z-10">
         <h1 className={`text-5xl md:text-6xl font-bold mb-6 transition-colors duration-300 ${
           isDark ? 'text-white' : 'text-gray-900'
@@ -94,15 +106,14 @@ export default function Home() {
         }`}>
           A simple way to work with data and visualize ideas
         </p>
-        <button className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg transition-colors ${
+
+        <Link href="/" className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg transition-colors ${
           isDark ? 'bg-white text-gray-900 hover:bg-gray-100' : 'bg-gray-900 text-white hover:bg-gray-800'
         }`}>
           Get Started
           <ArrowRight className="w-4 h-4" />
-        </button>
+        </Link>
       </main>
     </div>
   );
 }
-
-
