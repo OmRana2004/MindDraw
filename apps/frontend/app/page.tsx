@@ -1,65 +1,108 @@
-import Image from "next/image";
+"use client"
+
+import { Grid, ArrowRight, Circle, Square, Triangle, Moon, Sun } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') {
+      setIsDark(true);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${
+      isDark ? 'bg-gray-900' : 'bg-white'
+    }`}>
+      <div className="absolute inset-0 pointer-events-none">
+        <Circle className={`absolute top-20 left-10 w-16 h-16 opacity-60 animate-pulse ${
+          isDark ? 'text-blue-500' : 'text-blue-200'
+        }`} style={{ animationDuration: '3s' }} />
+        <Square className={`absolute top-32 right-20 w-12 h-12 opacity-50 rotate-12 ${
+          isDark ? 'text-pink-500' : 'text-pink-200'
+        }`} />
+        <Triangle className={`absolute bottom-40 left-1/4 w-20 h-20 opacity-40 -rotate-12 ${
+          isDark ? 'text-green-500' : 'text-green-200'
+        }`} />
+        <Circle className={`absolute top-1/2 right-10 w-10 h-10 opacity-50 ${
+          isDark ? 'text-yellow-500' : 'text-yellow-200'
+        }`} />
+        <Square className={`absolute bottom-20 right-1/3 w-14 h-14 opacity-40 rotate-45 ${
+          isDark ? 'text-purple-500' : 'text-purple-200'
+        }`} />
+        <Circle className={`absolute top-1/3 left-1/3 w-8 h-8 opacity-60 ${
+          isDark ? 'text-orange-500' : 'text-orange-200'
+        }`} />
+        <Triangle className={`absolute bottom-1/3 right-1/4 w-16 h-16 opacity-30 rotate-45 ${
+          isDark ? 'text-teal-500' : 'text-teal-200'
+        }`} />
+        <Square className={`absolute top-1/4 right-1/2 w-10 h-10 opacity-40 -rotate-12 ${
+          isDark ? 'text-red-500' : 'text-red-200'
+        }`} />
+      </div>
+
+      <nav className={`border-b relative z-10 backdrop-blur-sm transition-colors duration-300 ${
+        isDark ? 'border-gray-800 bg-gray-900/80' : 'border-gray-200 bg-white/80'
+      }`}>
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Grid className={`w-6 h-6 ${isDark ? 'text-white' : 'text-gray-900'}`} />
+            <span className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              ExcelDraw
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-lg transition-colors ${
+                isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
+              }`}
+              aria-label="Toggle theme"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              {isDark ? (
+                <Sun className="w-5 h-5 text-yellow-400" />
+              ) : (
+                <Moon className="w-5 h-5 text-gray-600" />
+              )}
+            </button>
+            <button className={`text-sm transition-colors ${
+              isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+            }`}>
+              Sign In
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+      </nav>
+
+      <main className="max-w-4xl mx-auto px-6 py-32 text-center relative z-10">
+        <h1 className={`text-5xl md:text-6xl font-bold mb-6 transition-colors duration-300 ${
+          isDark ? 'text-white' : 'text-gray-900'
+        }`}>
+          Spreadsheets with drawing tools
+        </h1>
+        <p className={`text-xl mb-12 max-w-2xl mx-auto transition-colors duration-300 ${
+          isDark ? 'text-gray-400' : 'text-gray-600'
+        }`}>
+          A simple way to work with data and visualize ideas
+        </p>
+        <button className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg transition-colors ${
+          isDark ? 'bg-white text-gray-900 hover:bg-gray-100' : 'bg-gray-900 text-white hover:bg-gray-800'
+        }`}>
+          Get Started
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </main>
     </div>
   );
 }
+
+
