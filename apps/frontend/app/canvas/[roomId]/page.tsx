@@ -1,6 +1,6 @@
 "use client"
 
-import { initDraw } from "@/app/draw"
+import { initDraw } from "@/draw"
 import { useEffect, useRef } from "react"
 
 export default function Canvas() {
