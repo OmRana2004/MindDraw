@@ -47,47 +47,63 @@ wss.on('connection', function connection(ws, request) {
         const parsedData =
           typeof data === 'string' ? JSON.parse(data) : JSON.parse(data.toString());
 
+        //  JOIN ROOM
         if (parsedData.type === 'join_room') {
           const user = users.find((x) => x.ws === ws);
           if (user && parsedData.roomId) {
             user.rooms.push(parsedData.roomId);
+
+            // Ensure the room exists (create if not found)
+            await prismaClient.room.upsert({
+              where: { slug: parsedData.roomId },
+              update: {},
+              create: {
+                slug: parsedData.roomId,
+                adminId: userId,
+              },
+            });
           }
         }
 
+        //  LEAVE ROOM
         if (parsedData.type === 'leave_room') {
           const user = users.find((x) => x.ws === ws);
           if (!user) return;
           user.rooms = user.rooms.filter((x) => x !== parsedData.roomId);
         }
 
+        // CHAT MESSAGE
         if (parsedData.type === 'chat') {
-          const roomId = Number(parsedData.roomId);
+          const slug = parsedData.roomId; // frontend sends slug
           const message = parsedData.message;
 
-          if (!Number.isInteger(roomId)) {
-            console.error('Invalid roomId:', parsedData.roomId);
+          // Find the room by slug
+          const room = await prismaClient.room.findUnique({
+            where: { slug },
+          });
+
+          if (!room) {
+            console.error('Room not found for slug:', slug);
             return;
           }
 
-          try {
-            await prismaClient.chat.create({
-              data: {
-                roomId,
-                message,
-                userId,
-              },
-            });
-          } catch (dbErr) {
-            console.error('Database save error:', dbErr);
-          }
+          // Save chat to DB
+          await prismaClient.chat.create({
+            data: {
+              roomId: room.id, // use integer id from DB
+              message,
+              userId,
+            },
+          });
 
+          // Broadcast to all users in the same room
           users.forEach((user) => {
             if (user.rooms.includes(parsedData.roomId)) {
               user.ws.send(
                 JSON.stringify({
                   type: 'chat',
                   message,
-                  roomId,
+                  roomId: slug,
                 })
               );
             }

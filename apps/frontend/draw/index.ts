@@ -22,38 +22,24 @@ export async function initDraw(
   socket: WebSocket
 ) {
   const ctx = canvas.getContext("2d");
-  if (!ctx) return;
 
   let existingShapes: Shape[] = await getExistingShapes(roomId);
 
-  socket.onopen = () => {
-    // ✅ Join room only after connection opens
-    socket.send(JSON.stringify({ type: "join_room", roomId }));
-  };
+  if (!ctx) {
+  return
+  }
 
   socket.onmessage = (event) => {
     const message = JSON.parse(event.data);
-    if (message.type === "chat") {
-      try {
-        const parsedShape = JSON.parse(message.message);
-        existingShapes.push(parsedShape);
-        clearCanvas(existingShapes, canvas, ctx);
-      } catch (e) {
-        console.warn("Invalid shape received:", e);
-      }
+    
+    if(message.type == "chat") {
+      const parsedShape = JSON.parse(message.message);
+      existingShapes.push(parsedShape.shape)
+      clearCanvas(existingShapes, canvas, ctx);
     }
-  };
-
-  socket.onclose = (e) => {
-    console.log("WebSocket closed:", e.reason || e.code);
-  };
-
-  socket.onerror = (err) => {
-    console.error("WebSocket error:", err);
-  };
+  }
 
   clearCanvas(existingShapes, canvas, ctx);
-
   let clicked = false;
   let startX = 0;
   let startY = 0;
@@ -67,7 +53,6 @@ export async function initDraw(
   canvas.addEventListener("mouseup", (e) => {
     if (!clicked) return;
     clicked = false;
-
     const width = e.clientX - startX;
     const height = e.clientY - startY;
     const shape: Shape = {
@@ -79,12 +64,14 @@ export async function initDraw(
     };
     existingShapes.push(shape);
 
-    // ✅ Send only if socket is open
+    //  Send only if socket is open
     if (socket.readyState === WebSocket.OPEN) {
       socket.send(
         JSON.stringify({
           type: "chat",
-          message: JSON.stringify(shape),
+          message: JSON.stringify({
+            shape
+          }),
           roomId,
         })
       );
